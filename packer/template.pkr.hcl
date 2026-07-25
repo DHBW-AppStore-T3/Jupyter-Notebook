@@ -8,22 +8,21 @@ packer {
 }
 
 ############################
-# APP-DEFAULTS (vom App-Entwickler vorgegeben)
+# APP-DEFAULTS (defined by the app developer)
 ############################
 
 locals {
-  # Platform-spezifisch (immer OpenStack)
   cloud = "openstack"
 
-  # App-spezifische Build-Konfiguration (vom App-Entwickler definiert)
+  # App-specific build configuration
   provision_script        = "scripts/provision.sh"
   source_image_name       = "Ubuntu 22.04"
   flavor                  = "gp1.small"
   ssh_username            = "ubuntu"
   ssh_timeout             = "20m"
-  use_blockstorage_volume = false # Empfohlen: false (verhindert hängende Volumes)
+  use_blockstorage_volume = false # Recommended: false (prevents dangling volumes)
   volume_size             = 10
-  use_floating_ip         = false # Build-VM braucht keine Floating IP
+  use_floating_ip         = false # Build VM does not need a floating IP
 }
 
 source "openstack" "image" {
@@ -48,7 +47,7 @@ source "openstack" "image" {
 build {
   sources = ["source.openstack.image"]
 
-  # Warte auf Cloud-Init bevor Provisioning startet
+  # Wait for cloud-init to finish before provisioning
   provisioner "shell" {
     inline = [
       "echo 'Waiting for cloud-init...'",
@@ -57,12 +56,12 @@ build {
     ]
   }
 
-  # Hauptprovisionierung
+  # Main provisioning
   provisioner "shell" {
     script = local.provision_script
-    # Retry bei temporären Netzwerkfehlern (apt-get)
+    # Retry on transient network errors (apt-get)
     max_retries = 3
-    # SSH kann während apt/sshd-Updates kurz neu starten
+    # SSH may briefly restart during apt/sshd upgrades
     expect_disconnect = true
   }
 }

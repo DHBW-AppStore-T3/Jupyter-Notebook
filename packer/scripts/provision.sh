@@ -3,32 +3,32 @@ set -euo pipefail
 
 # -----------------------------------------------------------------------------
 # Jupyter Notebook / JupyterHub Provisioning Script
-# - Mehrbenutzer-Betrieb via JupyterHub (PAM + System-User)
-# - Idempotent, reproduzierbar, CI/CD-tauglich
+# - Multi-user setup via JupyterHub (PAM + system users)
+# - Idempotent, reproducible, CI/CD-ready
 # -----------------------------------------------------------------------------
 
-echo "Warte auf cloud-init (sofern vorhanden)..."
+echo "Waiting for cloud-init (if present)..."
 cloud-init status --wait || true
 
-echo "System aktualisieren..."
+echo "Updating system packages..."
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
 
-echo "Installiere Basis-Pakete..."
+echo "Installing base packages..."
 sudo apt-get install -y --no-install-recommends \
   curl ca-certificates git \
   python3 python3-venv python3-pip
 
-echo "Installiere Node.js (LTS) + npm..."
+echo "Installing Node.js (LTS) + npm..."
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y --no-install-recommends nodejs
 
-# SSH-Passwort-Authentifizierung vorbereiten (für cloud-init)
-echo "Bereite SSH für Passwort-Auth vor..."
+# Enable SSH password authentication for cloud-init provisioning
+echo "Configuring SSH for password authentication..."
 sudo sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
 sudo sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-echo "Installiere JupyterHub + JupyterLab..."
+echo "Installing JupyterHub + JupyterLab..."
 if [ ! -d "/opt/jupyterhub" ]; then
   sudo python3 -m venv /opt/jupyterhub
 fi
@@ -36,10 +36,10 @@ fi
 sudo /opt/jupyterhub/bin/pip install --upgrade pip
 sudo /opt/jupyterhub/bin/pip install jupyterhub jupyterlab
 
-echo "Installiere configurable-http-proxy (stabile Version)..."
+echo "Installing configurable-http-proxy (pinned version)..."
 sudo npm install -g configurable-http-proxy@5.2.0
 
-echo "Konfiguriere JupyterHub..."
+echo "Configuring JupyterHub..."
 sudo mkdir -p /etc/jupyterhub
 
 sudo tee /etc/jupyterhub/jupyterhub_config.py >/dev/null << 'EOF'
@@ -52,7 +52,7 @@ c.Authenticator.admin_users = set()
 c.Authenticator.allow_all = True
 EOF
 
-echo "Systemd-Service für JupyterHub erstellen..."
+echo "Creating systemd service for JupyterHub..."
 sudo tee /etc/systemd/system/jupyterhub.service >/dev/null << 'EOF'
 [Unit]
 Description=JupyterHub
@@ -72,12 +72,12 @@ sudo systemctl daemon-reload
 sudo systemctl enable jupyterhub
 sudo systemctl restart jupyterhub
 
-echo "Cleanup: apt-Cache & Listen entfernen..."
+echo "Cleaning up apt cache and package lists..."
 sudo apt-get clean
 sudo rm -rf /var/lib/apt/lists/*
 
-echo "Setze machine-id zurück..."
+echo "Resetting machine-id..."
 sudo truncate -s 0 /etc/machine-id
 sudo rm -f /var/lib/dbus/machine-id || true
 
-echo "Provisioning abgeschlossen."
+echo "Provisioning complete."

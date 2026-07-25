@@ -1,20 +1,20 @@
 ########################################
-# Platform-Contract-Variablen (vom Worker/Platform gesetzt)
+# Platform Contract Variables (set by Worker/Platform)
 ########################################
 
 variable "image_name" {
   type        = string
-  description = "Glance-Image-Name – vom Worker zur Build-Zeit gesetzt. @platform:internal"
+  description = "Glance image name – set by the worker at build time. @platform:internal"
 }
 
 variable "networks" {
   type        = list(string)
-  description = "Netzwerk-UUIDs für Build-VM @openstack:network:id:list"
+  description = "Network UUIDs for the build VM @openstack:network:id:list"
   default     = ["4971e080-966d-485e-a161-3e2b7fefad53"]
 }
 
 variable "security_groups" {
   type        = list(string)
-  description = "Security Groups für Build-VM @openstack:security_group:id:list"
+  description = "Security groups for the build VM @openstack:security_group:id:list"
   default     = ["4ffaf007-df66-4250-9118-1bd99378d34a"]
 }

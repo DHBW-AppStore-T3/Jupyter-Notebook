@@ -1,9 +1,8 @@
 #cloud-config
 
-# SSH mit Passwort-Auth aktivieren
+# Enable SSH password authentication
 ssh_pwauth: true
 
-# Pakete installieren (Basis-Tools)
 packages:
   - curl
   - wget
@@ -14,13 +13,11 @@ packages:
   - openssl
   - net-tools
 
-# Gruppen für jedes Team erstellen
 groups:
 %{ for team in unique_teams ~}
   - ${team}
 %{ endfor ~}
 
-# Benutzer erstellen
 users:
 %{ for idx, user in all_users ~}
   - name: ${user.username}
@@ -30,7 +27,7 @@ users:
     lock_passwd: false
 %{ endfor ~}
 
-# SSH-Konfiguration in separate Datei
+# SSH configuration in a separate drop-in file
 write_files:
   - path: /etc/ssh/sshd_config.d/99-custom.conf
     content: |
@@ -40,17 +37,14 @@ write_files:
       UsePAM yes
     permissions: '0644'
 
-# Setup-Befehle
 runcmd:
-  # Passwörter setzen (ungehashed)
+  # Set passwords (plaintext)
 %{ for idx, user in all_users ~}
   - echo '${user.username}:${passwords[idx]}' | chpasswd
 %{ endfor ~}
 
-  # SSH-Service neu starten
   - systemctl restart sshd
 
-  # JupyterHub sicherstellen
   - systemctl enable jupyterhub
   - systemctl restart jupyterhub
 
@@ -59,26 +53,25 @@ runcmd:
   - ufw allow OpenSSH
   - ufw allow 8000/tcp
 
-  # Setup-Log (OHNE Passwörter aus Sicherheitsgründen)
+  # Setup log (passwords intentionally omitted for security)
   - |
     cat >> /var/log/setup-complete.log <<EOF
     ================================================
-    Setup abgeschlossen: $(date)
+    Setup complete: $(date)
     ================================================
     Teams: ${join(", ", unique_teams)}
-    Benutzer erstellt: ${length(all_users)}
+    Users created: ${length(all_users)}
     JupyterHub: Port 8000
     ================================================
     EOF
 
-# Abschlussnachricht
 final_message: |
   ================================================
-  JupyterHub Multi-User System bereit!
+  JupyterHub Multi-User System ready!
   ================================================
   Teams: ${join(", ", unique_teams)}
-  Benutzer: ${length(all_users)}
+  Users: ${length(all_users)}
 
-  Zugriff: http://<vm-ip>:8000
-  Login: <username> + Passwort (siehe Outputs)
+  Access: http://<vm-ip>:8000
+  Login: <username> + password (see Outputs)
   ================================================
