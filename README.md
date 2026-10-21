@@ -41,3 +41,21 @@ Bei vorhandenem Packer-Image entfällt der Build — dann ca. **3–6 Minuten** 
 Kein File-Upload. Alle Defaults sind auf die DHBW-OpenStack-Infrastruktur vorkonfiguriert und müssen in der Regel nicht geändert werden.
 
  
+
+## Pod-Variante (ab v2.0.0)
+
+Ab Version `v2.0.0` läuft Jupyter-Notebook als Pods statt als VM (`appstore.yaml`,
+App-Vertrag v2): **ein JupyterLab-Pod je Person** mit eigenem Speicher (5 GiB für Notebooks
+und Einstellungen), HTTPS-Link und eigenem Passwort unter „Meine Zugänge“. JupyterHub, SSH
+und die gemeinsame VM entfallen; keine VM, kein Packer-Build, kein OpenStack-Credential.
+
+- **Login:** auf der Login-Seite das generierte Passwort eintragen („Password or token“).
+- **Software:** JupyterLab, NumPy, pandas und Matplotlib (Versionen in `image/requirements.txt`).
+  Weitere Pakete lassen sich im Notebook mit `%pip install …` nachinstallieren (Internetzugang
+  ist erlaubt; sie landen im persistenten Home-Verzeichnis).
+- **Kein `sudo`:** Systempakete (`apt`) können nicht installiert werden; das Root-Dateisystem
+  ist schreibgeschützt, schreibbar sind nur das Home-Verzeichnis und `/tmp`.
+- **Image:** `image/Dockerfile` wird von `.github/workflows/image.yml` gebaut (inkl. Smoke-Test
+  mit dem Sicherheitskontext der Plattform). Nach einer Änderung den neuen Digest in
+  `appstore.yaml` eintragen und eine neue Version taggen.
+- Die Versionen `v1.x` (Terraform/Packer) laufen unverändert weiter.
