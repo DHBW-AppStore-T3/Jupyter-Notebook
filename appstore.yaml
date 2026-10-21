@@ -9,7 +9,7 @@ workload:
   containers:
     - name: lab
       # Built by .github/workflows/image.yml. After changing image/, copy the new digest here.
-      image: ghcr.io/dhbw-appstore-t3/apps/jupyter-notebook@sha256:0000000000000000000000000000000000000000000000000000000000000000
+      image: ghcr.io/dhbw-appstore-t3/apps/jupyter-notebook@sha256:904585b910e0845ff06a647b27eec5e73b7a5557e43f04d113841031524a5c5c
       expose: { port: 8080, path: / }
       # Idle JupyterLab needs little; notebooks (pandas) may burst up to the limits.
       resources: { cpu: "2", memory: 2Gi, requests: { cpu: 100m, memory: 256Mi } }
