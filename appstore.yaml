@@ -1,0 +1,26 @@
+# App contract v2: Jupyter-Notebook runs as pods, not as VMs (the VM versions,
+# v1.x, are only reachable through their git tags). One JupyterLab per person;
+# JupyterHub is not needed any more.
+apiVersion: appstore/v2
+name: jupyter-notebook
+runtime: kubernetes
+scope: user
+workload:
+  containers:
+    - name: lab
+      # Built by .github/workflows/image.yml. After changing image/, copy the new digest here.
+      image: ghcr.io/dhbw-appstore-t3/apps/jupyter-notebook@sha256:904585b910e0845ff06a647b27eec5e73b7a5557e43f04d113841031524a5c5c
+      expose: { port: 8080, path: / }
+      # Idle JupyterLab needs little; notebooks (pandas) may burst up to the limits.
+      resources: { cpu: "2", memory: 2Gi, requests: { cpu: 100m, memory: 256Mi } }
+      env:
+        # The login page accepts this as "password or token".
+        - { name: JUPYTER_TOKEN, from: generated-password }
+      writablePaths: [/tmp]
+  # HOME of the container: notebooks, ~/.jupyter, ~/.local (pip install --user).
+  storage: { size: 5Gi, mountPath: /home/jovyan }
+# pip install in notebooks needs the internet.
+egress: internet
+access:
+  - { type: url, template: "https://{workload}-{deployment}.{domain}" }
+  - { type: password, from: generated-password, username: "{user}" }
