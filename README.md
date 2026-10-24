@@ -16,7 +16,7 @@ Keine. Kein File-Upload, alle Einstellungen stehen in `appstore.yaml`.
 
 ## Image und CI
 
-`image/Dockerfile` wird von `.github/workflows/image.yml` gebaut und mit dem Sicherheitskontext der Plattform getestet (UID 1000, Read-only-Root, keine Capabilities).
+`image/Dockerfile` wird von `.github/workflows/ci.yml` gebaut (zentrale Pipeline aus `app-registry`: Vertrag, hadolint, Smoke-Test, Trivy) und mit dem Sicherheitskontext der Plattform getestet (UID 1000, Read-only-Root, keine Capabilities; `.github/smoke-test.sh`).
 
 - **Pull Request:** das Image wird gebaut und getestet, aber nicht veröffentlicht.
 - **Push auf `main` oder `dev`:** das Image wird zusätzlich nach GHCR gepusht. Den Digest zeigt die Zusammenfassung des Jobs.
