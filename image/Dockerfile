@@ -1,7 +1,7 @@
 # JupyterLab for the pod runtime (appstore.yaml). One container per person; the
 # platform sets user (UID 1000), a read-only root filesystem and the login
 # secret (env JUPYTER_TOKEN, entered on the login page as "password or token").
-FROM docker.io/library/python:3.12.15-slim-bookworm
+FROM docker.io/library/python:3.12.15-slim-trixie
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
