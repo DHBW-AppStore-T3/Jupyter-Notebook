@@ -3,6 +3,17 @@
 # secret (env JUPYTER_TOKEN, entered on the login page as "password or token").
 FROM docker.io/library/python:3.12.15-slim-bookworm
 
+# Security fixes the base image does not have yet (weekly Trivy scan, 2026-10-26):
+# openssl/libssl3 CVE-2026-84782, fixed in 3.0.22-1~deb12u2. --only-upgrade takes the
+# newest fix from bookworm-security; the version check fails the build instead of
+# shipping without it. Edit this line for the next fix: an unchanged line lets the
+# build cache reuse the old layer, and the upgrade would not run again.
+# hadolint ignore=DL3008
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --only-upgrade openssl libssl3 \
+ && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libssl3)" ge 3.0.22-1~deb12u2 \
+ && rm -rf /var/lib/apt/lists/*
+
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_ROOT_USER_ACTION=ignore \
