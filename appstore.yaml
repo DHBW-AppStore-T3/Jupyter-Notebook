@@ -19,8 +19,12 @@ workload:
       writablePaths: [/tmp]
   # HOME of the container: notebooks, ~/.jupyter, ~/.local (pip install --user).
   storage: { size: 5Gi, mountPath: /home/jovyan }
-# pip install in notebooks needs the internet.
-egress: internet
+# What JupyterLab may reach (the contract: app-registry README, "network"). NumPy, pandas and Matplotlib are in the image;
+# only `%pip install` and downloads of data need the internet, so it starts off and a teacher switches it on where a
+# course needs it. Students' own TCP/UDP servers and clients between the labs of one deployment: a choice, off by default.
+network:
+  internet: { allowed: true, default: false }
+  podNetwork: { allowed: true, default: false }
 access:
   - { type: url, template: "https://{workload}-{deployment}.{domain}" }
   - { type: password, from: generated-password, username: "{user}" }
