@@ -6,6 +6,8 @@ Eine eigene JupyterLab-Instanz für jede Person eines Deployments, mit eigenem S
 
 Jede Person erhält ihren eigenen Pod und ein von der Plattform erzeugtes Passwort. Notebooks und Einstellungen liegen im persistenten Home-Verzeichnis und überstehen Pause/Fortsetzen und Neustart.
 
+Standard ist ein Pod je Person (`scope: user`). Mit `scopeChoice: true` kann die Lehrperson im Wizard unter „Experteneinstellungen“ stattdessen einen Pod je Gruppe wählen; die Mitglieder einer Gruppe teilen sich dann Pod, Speicher und Passwort.
+
 - **Login:** auf der Login-Seite das generierte Passwort eintragen („Password or token“).
 - **Software:** JupyterLab, NumPy, pandas und Matplotlib (Versionen in `image/requirements.txt`). Weitere Pakete lassen sich im Notebook mit `%pip install …` nachinstallieren (braucht den Internetzugang, den die Lehrperson im Wizard einschaltet, TCP 80/443; sie landen im persistenten Home-Verzeichnis).
 - **Kein `sudo`:** Systempakete (`apt`) können nicht installiert werden. Das Root-Dateisystem ist schreibgeschützt, schreibbar sind nur das Home-Verzeichnis und `/tmp`.

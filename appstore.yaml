@@ -5,6 +5,7 @@ apiVersion: appstore/v2
 name: jupyter-notebook
 runtime: kubernetes
 scope: user
+scopeChoice: true
 workload:
   containers:
     - name: lab
